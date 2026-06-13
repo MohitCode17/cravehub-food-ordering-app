@@ -1,10 +1,24 @@
 import jwt from "jsonwebtoken";
+import axios from "axios";
 import User from "../model/User.js";
 import TryCatch from "../middlewares/trycatch.js";
 import { AuthenticatedRequest } from "../middlewares/isAuth.js";
+import { oauth2Client } from "../config/googleConfig.js";
 
 export const loginUser = TryCatch(async (req, res) => {
-  const { name, email, picture } = req.body;
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ message: "Authorization code is required" });
+  }
+
+  const { tokens } = await oauth2Client.getToken(code);
+
+  oauth2Client.setCredentials(tokens);
+
+  const userResponse = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`);
+
+  const { name, email, picture } = userResponse.data;
 
   // Check if user already exists
   let user = await User.findOne({ email });
