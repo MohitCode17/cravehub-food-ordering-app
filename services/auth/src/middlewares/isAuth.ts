@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { IUser } from "../model/User.js";
+import User, { IUser } from "../model/User.js";
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser | null;
@@ -30,22 +30,28 @@ export const isAuth = async (
       return;
     }
 
-    const decodedValue = jwt.verify(
+    const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string,
     ) as JwtPayload;
 
-    if (!decodedValue || !decodedValue.user) {
+    if (!decoded || !decoded.id) {
       res.status(401).json({ message: "Invalid token!" });
-
       return;
     }
 
-    req.user = decodedValue.user;
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      res.status(401).json({
+        message: "User not found",
+      });
+      return;
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    res
-        .status(500)
-        .json({ message: "Please login - JWT Error" });
+    res.status(500).json({ message: "Please login - JWT Error" });
   }
 };

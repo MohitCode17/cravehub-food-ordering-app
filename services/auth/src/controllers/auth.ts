@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
 import axios from "axios";
 import User from "../model/User.js";
 import TryCatch from "../middlewares/trycatch.js";
 import { AuthenticatedRequest } from "../middlewares/isAuth.js";
 import { oauth2Client } from "../config/googleConfig.js";
+import { generateToken } from "../utils/generateToken.js";
 
 export const loginUser = TryCatch(async (req, res) => {
   const { code } = req.body;
@@ -32,9 +32,7 @@ export const loginUser = TryCatch(async (req, res) => {
     });
   }
 
-  const token = jwt.sign({ user }, process.env.JWT_SECRET as string, {
-    expiresIn: "15d",
-  });
+  const token = generateToken(user._id.toString(), user.role);
 
   res.status(200).json({ message: "Login Successfully", token, user });
 });
@@ -66,9 +64,7 @@ export const addUserRole = TryCatch(async (req: AuthenticatedRequest, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  const token = jwt.sign({ user }, process.env.JWT_SECRET as string, {
-    expiresIn: "15d",
-  });
+  const token = generateToken(user._id.toString(), user.role);
 
   res.status(200).json({ user, token });
 });
