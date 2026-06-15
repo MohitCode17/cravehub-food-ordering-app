@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -8,10 +7,12 @@ import { FcGoogle } from "react-icons/fc";
 import { AUTH_SERVICE } from "../main";
 import authBanner from "../assets/auth-banner.jpg";
 import { LuUtensilsCrossed } from "react-icons/lu";
+import { useAppData } from "../context/AppContext";
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser, setIsAuth } = useAppData();
+  const [loading, setLoading] = useState(false);
 
   const responseGoogle = async (authResult: any) => {
     setLoading(true);
@@ -24,6 +25,8 @@ const Login = () => {
       localStorage.setItem("token", result.data.token);
       toast.success(result.data.message);
       setLoading(false);
+      setUser(result.data.user);
+      setIsAuth(true);
       navigate("/");
     } catch (error) {
       console.log(error);

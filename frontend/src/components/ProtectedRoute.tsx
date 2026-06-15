@@ -2,8 +2,8 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAppData } from "../context/AppContext";
 
 const ProtectedRoute = () => {
-  const { isAuth, user, loading } = useAppData();
   const location = useLocation();
+  const { isAuth, user, loading } = useAppData();
 
   if (loading) return null;
 
@@ -11,11 +11,11 @@ const ProtectedRoute = () => {
     return <Navigate to={"/login"} replace />;
   }
 
-  if (!user?.role && location.pathname !== "/select-role") {
+  if (user?.role === null && location.pathname !== "/select-role") {
     return <Navigate to={"/select-role"} replace />;
   }
 
-  if (user?.role && location.pathname === "/select-role") {
+  if (user?.role !== null && location.pathname === "/select-role") {
     return <Navigate to={"/"} replace />;
   }
 
