@@ -16,7 +16,9 @@ export const loginUser = TryCatch(async (req, res) => {
 
   oauth2Client.setCredentials(tokens);
 
-  const userResponse = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`);
+  const userResponse = await axios.get(
+    `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
+  );
 
   const { name, email, picture } = userResponse.data;
 
@@ -32,7 +34,13 @@ export const loginUser = TryCatch(async (req, res) => {
     });
   }
 
-  const token = generateToken(user._id.toString(), user.role);
+  const token = generateToken(
+    user._id.toString(),
+    user.name,
+    user.email,
+    user.image,
+    user.role,
+  );
 
   res.status(200).json({ message: "Login Successfully", token, user });
 });
@@ -64,7 +72,13 @@ export const addUserRole = TryCatch(async (req: AuthenticatedRequest, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  const token = generateToken(user._id.toString(), user.role);
+  const token = generateToken(
+    user._id.toString(),
+    user.name,
+    user.email,
+    user.image,
+    user.role,
+  );
 
   res.status(200).json({ user, token });
 });
