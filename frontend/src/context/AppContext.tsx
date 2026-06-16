@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { AUTH_SERVICE } from "../main";
-import type { AppContextType, User } from "../types";
+import type { AppContextType, LocationData, User } from "../types";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -19,7 +19,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState<LocationData | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [city, setCity] = useState("Fetching Location...");
 
@@ -51,9 +51,47 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (!navigator.geolocation)
+      return alert("Please Allow Location to continue");
+    setLoadingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+        );
+        const data = await res.json();
+
+        setLocation({
+          latitude,
+          longitude,
+          formattedAddress: data.display_name || "current location",
+        });
+
+        setCity(
+          data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            "Your Location",
+        );
+      } catch (error) {
+        console.error("Error fetching location", error);
+        setLocation({
+          latitude,
+          longitude,
+          formattedAddress: "Current Location",
+        });
+        setCity("Failed to load");
+      }
+    });
+  }, []);
+
   return (
     <AppContext.Provider
-      value={{ isAuth, loading, user, setIsAuth, setLoading, setUser }}
+      value={{ isAuth, loading, user, city, location, loadingLocation, setIsAuth, setLoading, setUser }}
     >
       {children}
     </AppContext.Provider>
