@@ -7,8 +7,7 @@ import { BiMapPin, BiSearch } from "react-icons/bi";
 const Navbar = () => {
   const currentLocation = useLocation();
   const { isAuth, city } = useAppData();
-  console.log("City", city);
-
+  
   const isHomePage = currentLocation.pathname === "/";
 
   const [searchParams, setSearchParams] = useSearchParams();

@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import { AppProvider } from "./context/AppContext.tsx";
 
 export const AUTH_SERVICE = "http://localhost:5000";
+export const RESTAURANT_SERVICE = "http://localhost:5001";
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 

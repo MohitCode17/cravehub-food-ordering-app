@@ -7,8 +7,16 @@ import PublicRoute from "./components/PublicRoute";
 import SelectRole from "./pages/SelectRole";
 import Navbar from "./components/Navbar";
 import Account from "./pages/Account";
+import Restaurant from "./pages/Restaurant";
+import { useAppData } from "./context/AppContext";
 
 const App = () => {
+  const { user } = useAppData();
+
+  if (user && user.role === "seller") {
+    return <Restaurant />;
+  }
+
   return (
     <>
       <BrowserRouter>
@@ -19,6 +27,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/select-role" element={<SelectRole />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/restaurant" element={<Restaurant/>} />
           </Route>
           <Route element={<PublicRoute />}>
             {/* Public Route */}
