@@ -7,6 +7,7 @@ export interface IUser {
   email: string;
   image: string;
   role: string;
+  restaurantId: string;
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -53,6 +54,7 @@ export const isAuth = async (
       email: decoded.email,
       image: decoded.image,
       role: decoded.role,
+      restaurantId: decoded.restaurantId,
     };
 
     next();
