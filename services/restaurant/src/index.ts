@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import restaurantRoutes from "./routes/restaurant.js";
+import menuItemRoutes from "./routes/menuItems.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use("/api/restaurant", restaurantRoutes);
+app.use("/api/item", menuItemRoutes);
 
 const port = process.env.PORT || 5001;
 
