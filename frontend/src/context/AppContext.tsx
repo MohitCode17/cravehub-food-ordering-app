@@ -8,6 +8,7 @@ import {
 } from "react";
 import { AUTH_SERVICE } from "../main";
 import type { AppContextType, LocationData, User } from "../types";
+import { Toaster } from "react-hot-toast";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -93,9 +94,20 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   return (
     <AppContext.Provider
-      value={{ isAuth, loading, user, city, location, loadingLocation, setIsAuth, setLoading, setUser }}
+      value={{
+        isAuth,
+        loading,
+        user,
+        city,
+        location,
+        loadingLocation,
+        setIsAuth,
+        setLoading,
+        setUser,
+      }}
     >
       {children}
+      <Toaster />
     </AppContext.Provider>
   );
 };

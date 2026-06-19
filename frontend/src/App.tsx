@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -27,14 +26,12 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/select-role" element={<SelectRole />} />
             <Route path="/account" element={<Account />} />
-            <Route path="/restaurant" element={<Restaurant/>} />
           </Route>
           <Route element={<PublicRoute />}>
             {/* Public Route */}
             <Route path="/login" element={<Login />} />
           </Route>
         </Routes>
-        <Toaster />
       </BrowserRouter>
     </>
   );
