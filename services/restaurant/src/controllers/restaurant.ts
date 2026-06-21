@@ -139,7 +139,6 @@ export const updateStatusRestaurant = TryCatch(
   },
 );
 
-
 export const updateRestaurant = TryCatch(
   async (req: AuthenticatedRequest, res) => {
     if (!req.user) {
@@ -161,3 +160,59 @@ export const updateRestaurant = TryCatch(
     res.status(200).json({ message: "Restaurant updated", restaurant });
   },
 );
+
+export const getNearbyRestaurant = TryCatch(async (req, res) => {
+  const { latitude, longitude, radius = 5000, search = "" } = req.query;
+
+  if (!latitude || !longitude) {
+    return res.status(400).json({
+      message: "Latitude and Longitude are required",
+    });
+  }
+
+  const query: any = {
+    isVerified: true,
+  };
+
+  if (search && typeof search === "string") {
+    query.name = { $regex: search, $options: "i" };
+  }
+
+  const restaurants = await Restaurant.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [Number(longitude), Number(latitude)],
+        },
+        distanceField: "distance",
+        maxDistance: Number(radius),
+        spherical: true,
+        query,
+      },
+    },
+    {
+      $sort: {
+        isOpen: -1, // Open restaurants comes first
+        distance: 1, // Nearby restaurants comes first
+      },
+    },
+    {
+      $addFields: {
+        distanceKm: {
+          $round: [{ $divide: ["$distance", 1000] }, 2], // Distance convertor, shows in km since mongodb gives distance in mtr.
+        },
+      },
+    },
+  ]);
+
+  res
+    .status(200)
+    .json({ success: true, count: restaurants.length, restaurants });
+});
+
+export const fetchSingleRestaurant = TryCatch(async (req, res) => {
+  const restaurant = await Restaurant.findById(req.params.id);
+
+  res.status(200).json({ restaurant });
+});
