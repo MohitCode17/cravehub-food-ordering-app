@@ -73,42 +73,43 @@ const RestaurantProfile = ({ restaurant, isSeller, onUpdate }: props) => {
       )}
 
       <div className="space-y-6 p-6">
-        {isSeller && (
-          <div className="flex items-start justify-between">
-            <div>
-              {editMode ? (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-lg outline-none focus:border-[#e23744]"
-                />
-              ) : (
-                <h2 className="text-3xl font-bold text-gray-900">
-                  {restaurant.name}
-                </h2>
-              )}
+        <div className="flex items-start justify-between">
+          <div>
+            {editMode ? (
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-lg outline-none focus:border-[#e23744]"
+              />
+            ) : (
+              <h2 className="text-3xl font-bold text-gray-900">
+                {restaurant.name}
+              </h2>
+            )}
 
-              <div className="mt-3 flex items-start gap-3 rounded-2xl bg-gray-50 p-3">
-                <div className="rounded-xl bg-[#e23744]/10 p-2">
-                  <BiMapPin className="h-4 w-4 text-[#e23744]" />
-                </div>
-
-                <span className="text-sm text-gray-600">
-                  {restaurant.autoLocation.formattedAddress ||
-                    "Location unavailable"}
-                </span>
+            <div className="mt-3 flex items-start gap-3 rounded-2xl bg-gray-50 p-3">
+              <div className="rounded-xl bg-[#e23744]/10 p-2">
+                <BiMapPin className="h-4 w-4 text-[#e23744]" />
               </div>
-            </div>
 
+              <span className="text-sm text-gray-600">
+                {restaurant.autoLocation.formattedAddress ||
+                  "Location unavailable"}
+              </span>
+            </div>
+          </div>
+
+          {isSeller && (
             <button
               onClick={() => setEditMode(!editMode)}
               className="rounded-xl bg-gray-100 p-2 text-gray-600 transition hover:bg-gray-200"
             >
               <BiEdit size={18} />
             </button>
-          </div>
-        )}
+          )}
+        </div>
+
         {editMode ? (
           <textarea
             value={description}
