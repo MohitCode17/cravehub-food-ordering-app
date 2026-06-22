@@ -6,8 +6,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { AUTH_SERVICE } from "../main";
-import type { AppContextType, LocationData, User } from "../types";
+import { AUTH_SERVICE, RESTAURANT_SERVICE } from "../main";
+import type { AppContextType, ICart, LocationData, User } from "../types";
 import { Toaster } from "react-hot-toast";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +23,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [city, setCity] = useState("Fetching Location...");
+  const [cart, setCart] = useState<ICart[]>([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [quantity, setQuantity] = useState(0);
 
   async function fetchUser() {
     const token = localStorage.getItem("token");
@@ -48,9 +51,32 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   }
 
+  async function fetchCart() {
+    if (!user || user.role !== "customer") return;
+
+    try {
+      const { data } = await axios.get(`${RESTAURANT_SERVICE}/api/cart/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setCart(data.cart || []);
+      setSubtotal(data.subtotal);
+      setQuantity(data.cartLength);
+    } catch (error) {
+      console.log("Error fetching cart", error);
+    }
+  }
+
   useEffect(() => {
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (user && user.role === "customer") {
+      fetchCart();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!navigator.geolocation)
@@ -104,6 +130,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         setIsAuth,
         setLoading,
         setUser,
+        cart,
+        fetchCart,
+        subtotal,
+        quantity
       }}
     >
       {children}

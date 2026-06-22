@@ -7,6 +7,7 @@ import { VscLoading } from "react-icons/vsc";
 import axios from "axios";
 import { RESTAURANT_SERVICE } from "../main";
 import toast from "react-hot-toast";
+import { useAppData } from "../context/AppContext";
 
 interface MenuItemsProps {
   items: IMenuItem[];
@@ -16,6 +17,7 @@ interface MenuItemsProps {
 
 const MenuItems = ({ items, isSeller, onItemDeleted }: MenuItemsProps) => {
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const { fetchCart } = useAppData();
 
   const handleDelete = async (itemId: string) => {
     const confirm = window.confirm("Are you sure you want to delete this item");
@@ -60,6 +62,29 @@ const MenuItems = ({ items, isSeller, onItemDeleted }: MenuItemsProps) => {
     }
   };
 
+  const addToCart = async (restaurantId: string, itemId: string) => {
+    try {
+      setLoadingItemId(itemId);
+
+      const { data } = await axios.post(
+        `${RESTAURANT_SERVICE}/api/cart/add`,
+        { restaurantId, itemId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      toast.success(data.message);
+      fetchCart();
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+    } finally {
+      setLoadingItemId(null);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {items.map((item) => {
@@ -67,6 +92,7 @@ const MenuItems = ({ items, isSeller, onItemDeleted }: MenuItemsProps) => {
 
         return (
           <div
+            key={item._id}
             className={`relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${!item.isAvailable ? "opacity-75" : ""}`}
           >
             <div className="relative shrink-0">
@@ -120,6 +146,8 @@ const MenuItems = ({ items, isSeller, onItemDeleted }: MenuItemsProps) => {
 
                 {!isSeller && (
                   <button
+                    disabled={!item.isAvailable || isLoading}
+                    onClick={() => addToCart(item.restaurantId, item._id)}
                     className={`flex items-center gap-2 rounded-xl bg-[#e23744] px-4 py-2 text-sm font-medium text-white transition ${!item.isAvailable || isLoading ? "cursor-not-allowed opacity-60" : "hover:bg-[#d32f3a]"}`}
                   >
                     {isLoading ? (
