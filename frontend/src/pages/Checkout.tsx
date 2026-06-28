@@ -22,7 +22,6 @@ const Checkout = () => {
   );
   const [loadingAddress, setLoadingAddress] = useState(true);
   const [loadingRazorpay, setLoadingRazorpay] = useState(false);
-  const [loadingStripe, setLoadingStripe] = useState(false);
   const [creatingOrder, setCreatingOrder] = useState(false);
 
   useEffect(() => {

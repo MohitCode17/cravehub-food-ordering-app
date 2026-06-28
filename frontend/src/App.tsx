@@ -12,6 +12,7 @@ import RestaurantPage from "./pages/RestaurantPage";
 import Cart from "./pages/Cart";
 import AddAddressPage from "./pages/Address";
 import Checkout from "./pages/Checkout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const App = () => {
   const { user } = useAppData();
@@ -28,6 +29,10 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             {/* Protected Route */}
             <Route path="/" element={<Home />} />
+            <Route
+              path="/paymentsuccess/:paymentId"
+              element={<PaymentSuccess />}
+            />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/address" element={<AddAddressPage />} />
