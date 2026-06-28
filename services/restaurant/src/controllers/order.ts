@@ -13,7 +13,7 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
     return res.status(401).json({ message: "Please login to continue" });
   }
 
-  const { paymentMethod, addressId, distance } = req.body;
+  const { paymentMethod, addressId } = req.body;
 
   if (!addressId) {
     return res.status(400).json({ message: "Address is required" });
@@ -25,6 +25,29 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (!address) {
     return res.status(404).json({ message: "Address not found" });
   }
+
+  // Calculate Distance
+  const getDistanceInKm = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return +(R * c).toFixed(2);
+  };
 
   const cartItems = await Cart.find({ userId: user._id })
     .populate<{ itemId: IMenuItem }>("itemId")
@@ -56,6 +79,13 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
       message: "Sorry this restaurant is closed for now.",
     });
   }
+
+  const distance = getDistanceInKm(
+    address.location.coordinates[1], // User lat
+    address.location.coordinates[0], // User lon
+    restaurant.autoLocation.coordinates[1], // Res lat
+    restaurant.autoLocation.coordinates[0], // Res lon
+  );
 
   let subtotal = 0;
 
@@ -119,7 +149,7 @@ export const createOrder = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   res.json({
     message: "Order created successfully",
-    orderid: order._id.toString(),
+    orderId: order._id.toString(),
     amount: totalAmount,
   });
 });
