@@ -9,6 +9,7 @@ import "leaflet/dist/leaflet.css";
 
 export const AUTH_SERVICE = "http://localhost:5000";
 export const RESTAURANT_SERVICE = "http://localhost:5001";
+export const UTILS_SERVICE = "http://localhost:5002";
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
