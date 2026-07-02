@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
-import { error } from "console";
 
 let io: Server;
 
