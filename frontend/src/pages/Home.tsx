@@ -82,39 +82,41 @@ const Home = () => {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Restaurants Near You
-        </h1>
-
-        <p className="mt-2 text-sm text-gray-500">
-          Discover great food around your location
-        </p>
-      </div>
       {restaurants.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {restaurants.map((res) => {
-            const [resLng, resLat] = res.autoLocation.coordinates;
+        <>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Restaurants Near You
+            </h1>
 
-            const distance = getDistanceInKm(
-              location.latitude,
-              location.longitude,
-              resLat,
-              resLng,
-            );
+            <p className="mt-2 text-sm text-gray-500">
+              Discover great food around your location
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {restaurants.map((res) => {
+              const [resLng, resLat] = res.autoLocation.coordinates;
 
-            return (
-              <RestaurantCard
-                key={res._id}
-                id={res._id}
-                name={res.name}
-                image={res.image ?? ""}
-                distance={`${distance}`}
-                isOpen={res.isOpen}
-              />
-            );
-          })}
-        </div>
+              const distance = getDistanceInKm(
+                location.latitude,
+                location.longitude,
+                resLat,
+                resLng,
+              );
+
+              return (
+                <RestaurantCard
+                  key={res._id}
+                  id={res._id}
+                  name={res.name}
+                  image={res.image ?? ""}
+                  distance={`${distance}`}
+                  isOpen={res.isOpen}
+                />
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center py-20 text-center">
           <h2 className="text-xl font-semibold text-gray-700">
