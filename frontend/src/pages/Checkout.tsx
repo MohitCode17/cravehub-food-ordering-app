@@ -249,7 +249,7 @@ const Checkout = () => {
 
           <div className="flex justify-between text-base font-semibold border-t pt-2">
             <span>Grand Total</span>
-            <span>₹${grandTotal}</span>
+            <span>₹{grandTotal}</span>
           </div>
         </div>
 
