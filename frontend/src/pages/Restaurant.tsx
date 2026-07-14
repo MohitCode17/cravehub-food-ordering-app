@@ -7,6 +7,7 @@ import RestaurantProfile from "../components/RestaurantProfile";
 import { BiFoodMenu, BiPlusCircle, BiBarChart } from "react-icons/bi";
 import MenuItems from "../components/MenuItems";
 import AddMenuItem from "../components/AddMenuItem";
+import RestaurantOrders from "../components/RestaurantOrders";
 
 type SellerTab = "menu" | "add-item" | "sales";
 
@@ -87,6 +88,9 @@ const Restaurant = () => {
         onUpdate={setRestaurant}
         isSeller={true}
       />
+
+      {/* Fetch Orders For Restaurant */}
+      <RestaurantOrders restaurantId={restaurant._id} />
 
       <div className="rounded-3xl border border-gray-100 bg-white p-2 mt-10 shadow-md">
         <div className="flex gap-2">
