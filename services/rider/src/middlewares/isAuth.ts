@@ -78,3 +78,19 @@ export const isSeller = async (
   }
   next();
 };
+
+export const isRider = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const user = req.user;
+
+  if (user && user.role !== "rider") {
+    res.status(401).json({
+      message: "You are not authorized rider",
+    });
+    return;
+  }
+  next();
+};
