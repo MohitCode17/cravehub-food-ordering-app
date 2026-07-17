@@ -15,12 +15,20 @@ import Checkout from "./pages/Checkout";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
+import RiderDashboard from "./pages/RiderDashboard";
+import LoadingUI from "./utils/loading";
 
 const App = () => {
-  const { user } = useAppData();
+  const { user, loading } = useAppData();
+
+  if (loading) return <LoadingUI loadingContent={"Loading..."} />;
 
   if (user && user.role === "seller") {
     return <Restaurant />;
+  }
+
+  if (user && user.role === "rider") {
+    return <RiderDashboard />;
   }
 
   return (
