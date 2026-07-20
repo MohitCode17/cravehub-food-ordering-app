@@ -3,8 +3,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import riderRoutes from "./routes/rider.js";
+import { connectRabbitMq } from "./config/rabbitmq.js";
 
 dotenv.config();
+
+await connectRabbitMq();
 
 const app = express();
 
