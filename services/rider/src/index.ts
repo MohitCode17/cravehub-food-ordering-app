@@ -4,10 +4,12 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import riderRoutes from "./routes/rider.js";
 import { connectRabbitMq } from "./config/rabbitmq.js";
+import { startOrderReadyConsumer } from "./config/orderReady.consumer.js";
 
 dotenv.config();
 
 await connectRabbitMq();
+startOrderReadyConsumer();
 
 const app = express();
 
