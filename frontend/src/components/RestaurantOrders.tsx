@@ -25,6 +25,7 @@ const RestaurantOrders = ({ restaurantId }: { restaurantId: string }) => {
 
   useEffect(() => {
     audioRef.current = new Audio(audio);
+    audioRef.current.load();
   }, []);
 
   const unlockAudio = () => {
@@ -87,6 +88,21 @@ const RestaurantOrders = ({ restaurantId }: { restaurantId: string }) => {
       socket.off("order:new", onNewOrder);
     };
   }, [socket, audioUnlocked]);
+
+  // Run when Rider assigned to order
+  useEffect(() => {
+    if (!socket) return;
+
+    const onUpdateOrder = () => {
+      fetchOrders();
+    };
+
+    socket.on("order:rider_assigned", onUpdateOrder);
+
+    return () => {
+      socket.off("order:rider_assigned", onUpdateOrder);
+    };
+  }, [socket]);
 
   if (loading) {
     return (
