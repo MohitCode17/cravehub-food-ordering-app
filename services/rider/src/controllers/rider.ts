@@ -239,7 +239,7 @@ export const fetchMyCurrentOrder = TryCatch(
       );
 
       res.json({
-        order: data,
+        order: data.order,
       });
     } catch (error) {
       res.status(500).json({
