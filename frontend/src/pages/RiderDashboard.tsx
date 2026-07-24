@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppData } from "../context/AppContext";
 import { useSocket } from "../context/SocketContext";
 import axios from "axios";
@@ -6,6 +6,10 @@ import { RIDER_SERVICE } from "../main";
 import toast from "react-hot-toast";
 import LoadingUI from "../utils/Loading";
 import { BiUpload } from "react-icons/bi";
+import type { IOrder } from "../types";
+import audio from "../assets/alert.mp3";
+import RiderOrderRequest from "../components/RiderOrderRequest";
+import RiderCurrentOrder from "../components/RiderCurrentOrder";
 
 interface IRider {
   _id: string;
@@ -23,6 +27,9 @@ const RiderDashboard = () => {
   const [profile, setProfile] = useState<IRider | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [incomingOrders, setIncomingOrders] = useState<string[]>([]);
+  const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [adhaarNumber, setAdhaarNumber] = useState("");
@@ -30,6 +37,53 @@ const RiderDashboard = () => {
   const [image, setImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio(audio);
+    audioRef.current.preload = "auto";
+  }, []);
+
+  const unlockAudio = async () => {
+    try {
+      if (!audioRef.current) return;
+      await audioRef.current.play();
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setAudioUnlocked(true);
+      toast.success("Sound Enable");
+    } catch (error) {
+      console.log("Error unlocking audio for rider dashboard", error);
+      toast.error("Tap again to enable sound");
+    }
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onOrderAvailable = ({ orderId }: { orderId: string }) => {
+      setIncomingOrders((prev) =>
+        prev.includes(orderId) ? prev : [...prev, orderId],
+      );
+
+      if (audioUnlocked && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+
+      setTimeout(() => {
+        setIncomingOrders((prev) => prev.filter((id) => id !== orderId));
+      }, 10000);
+    };
+
+    socket.on("order:available", onOrderAvailable);
+
+    return () => {
+      socket.off("order:available", onOrderAvailable);
+    };
+  }, [socket, audioUnlocked]);
+
+  // Fetch Rider Profile
   const fetchProfile = async () => {
     try {
       const { data } = await axios.get(`${RIDER_SERVICE}/api/rider/myprofile`, {
@@ -52,6 +106,30 @@ const RiderDashboard = () => {
     else setLoading(false);
   }, [user]);
 
+  // Fetch Current Order
+  const fetchCurrentOrder = async () => {
+    try {
+      const { data } = await axios.get(
+        `${RIDER_SERVICE}/api/rider/order/current`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      setCurrentOrder(data.order);
+    } catch (error) {
+      console.log(error);
+      setCurrentOrder(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentOrder();
+  }, []);
+
+  // Toggle offline or online feature
   const toggleAvailability = async () => {
     if (!navigator.geolocation) {
       toast.error("Location Access Required");
@@ -89,6 +167,7 @@ const RiderDashboard = () => {
     });
   };
 
+  // Create Rider Profile
   const handleSubmit = async () => {
     if (!navigator.geolocation) {
       toast.error("Location Access Required");
@@ -274,8 +353,7 @@ const RiderDashboard = () => {
         </div>
 
         {/* Availability */}
-
-        {profile.isVerified && (
+        {profile.isVerified && !currentOrder && (
           <div className="mt-8">
             <button
               onClick={toggleAvailability}
@@ -307,6 +385,69 @@ const RiderDashboard = () => {
           </div>
         )}
       </div>
+      {/* Enable sound Feature todo */}
+      {!audioUnlocked && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔔</span>
+            <div>
+              <p className="font-medium text-blue-900">
+                Enable Sound Notification
+              </p>
+              <p className="text-sm text-blue-700">
+                Get notified whenever a new order arrives.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={unlockAudio}
+            className="w-full md:w-auto rounded-xl bg-blue-600 px-5 py-2.5 text-white font-medium transition hover:bg-blue-700"
+          >
+            Enable sound
+          </button>
+        </div>
+      )}
+
+      {/* Display Incoming Orders */}
+      {profile.isAvailable && incomingOrders.length > 0 && (
+        <div className="mx-auto mt-8 max-w-xl space-y-5 px-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Incoming Orders
+              </h2>
+
+              <p className="text-sm text-gray-500">
+                Accept quickly before another rider gets it.
+              </p>
+            </div>
+
+            <span className="rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-600">
+              {incomingOrders.length} New
+            </span>
+          </div>
+
+          {incomingOrders.map((id) => (
+            <RiderOrderRequest
+              key={id}
+              orderId={id}
+              onAccepted={() => {
+                fetchProfile();
+                fetchCurrentOrder();
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {currentOrder && (
+        <div className="mx-auto max-w-xl px-4 space-y-4">
+          <RiderCurrentOrder
+            order={currentOrder}
+            onStatusUpdate={fetchCurrentOrder}
+          />
+        </div>
+      )}
     </div>
   );
 };
