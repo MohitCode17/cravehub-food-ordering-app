@@ -5,12 +5,16 @@ import type { IOrder } from "../types";
 import axios from "axios";
 import { RESTAURANT_SERVICE } from "../main";
 import { statusStyles } from "../utils/statusStyles";
+import UserOrderMap from "../components/UserOrderMap";
 
 const OrderDetails = () => {
   const { id } = useParams();
   const { socket } = useSocket();
   const [order, setOrder] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [riderLocation, setRiderLocation] = useState<[number, number] | null>(
+    null,
+  );
 
   const fetchOrder = async () => {
     try {
@@ -48,6 +52,30 @@ const OrderDetails = () => {
     return () => {
       socket.off("order:update", onOrderUpdate);
       socket.off("order:rider_assigned", onOrderUpdate);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket || !id) return;
+
+    socket.emit("join", `user:${id}`);
+
+    return () => {
+      socket.emit("leave", `user:${id}`);
+    };
+  }, [socket, id]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onRiderLocation = ({ latitude, longitude }: any) => {
+      console.log("Rider location:", latitude, longitude);
+      setRiderLocation([latitude, longitude]);
+    };
+    socket.on("rider:location", onRiderLocation);
+
+    return () => {
+      socket.off("rider:location", onRiderLocation);
     };
   }, [socket]);
 
@@ -208,6 +236,18 @@ const OrderDetails = () => {
           </div>
         </div>
       </div>
+      {(order.status === "rider_assigned" || order.status === "picked_up") &&
+        (riderLocation ? (
+          <UserOrderMap
+            riderLocation={riderLocation}
+            deliveryLocation={[
+              order.deliveryAddress.latitude!,
+              order.deliveryAddress.longitude!,
+            ]}
+          />
+        ) : (
+          <p>Waiting for rider</p>
+        ))}
     </div>
   );
 };
