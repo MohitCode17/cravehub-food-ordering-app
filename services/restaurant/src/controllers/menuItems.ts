@@ -18,8 +18,23 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
 
   const { name, description, price } = req.body;
 
-  if (!name || !price) {
-    return res.status(400).json({ message: "Name and Price are required" });
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    price === undefined ||
+    price === null
+  ) {
+    return res.status(400).json({
+      message: "Name and price are required",
+    });
+  }
+
+  const numericPrice = Number(price);
+
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    return res.status(400).json({
+      message: "Price must be greater than 0",
+    });
   }
 
   const file = req.file;
@@ -48,7 +63,7 @@ export const addMenuItem = TryCatch(async (req: AuthenticatedRequest, res) => {
   const item = await MenuItems.create({
     name,
     description,
-    price,
+    price: numericPrice,
     restaurantId: restaurant._id,
     image: uploadResult.url,
   });
@@ -150,7 +165,7 @@ export const toggleMenuItemAvailability = TryCatch(
     await item.save();
 
     res.status(200).json({
-      message: `Item marked as ${item.isAvailable ? "Available" : "Unavailavle"}`,
+      message: `Item marked as ${item.isAvailable ? "Available" : "Unavailable"}`,
       item,
     });
   },

@@ -28,7 +28,7 @@ export const addRestaurant = TryCatch(
     const { name, description, latitude, longitude, formattedAddress, phone } =
       req.body;
 
-    if (!name || !latitude || !longitude) {
+    if (!name || latitude === undefined || longitude === undefined) {
       return res.status(400).json({
         message: "Please give all details",
       });
@@ -146,6 +146,18 @@ export const updateRestaurant = TryCatch(
     }
 
     const { name, description } = req.body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({
+        message: "Restaurant name is required",
+      });
+    }
+
+    if (description !== undefined && typeof description !== "string") {
+      return res.status(400).json({
+        message: "Description must be a string",
+      });
+    }
 
     const restaurant = await Restaurant.findOneAndUpdate(
       { ownerId: req.user._id },

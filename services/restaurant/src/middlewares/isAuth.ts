@@ -59,7 +59,9 @@ export const isAuth = async (
 
     next();
   } catch (error) {
-    res.status(500).json({ message: "Please login - JWT Error" });
+    res.status(401).json({
+      message: "Invalid or expired token",
+    });
   }
 };
 
@@ -70,9 +72,16 @@ export const isSeller = async (
 ): Promise<void> => {
   const user = req.user;
 
-  if (user && user.role !== "seller") {
+  if (!user) {
     res.status(401).json({
-      message: "You are not authorized seller",
+      message: "Authentication required",
+    });
+    return;
+  }
+
+  if (user && user.role !== "seller") {
+    res.status(403).json({
+      message: "Seller access required",
     });
     return;
   }

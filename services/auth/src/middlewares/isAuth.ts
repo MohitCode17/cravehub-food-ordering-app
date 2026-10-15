@@ -52,6 +52,8 @@ export const isAuth = async (
     req.user = user;
     next();
   } catch (error) {
-    res.status(500).json({ message: "Please login - JWT Error" });
+    res.status(401).json({
+      message: "Invalid or expired token",
+    });
   }
 };

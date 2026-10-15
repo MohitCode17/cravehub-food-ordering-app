@@ -21,6 +21,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 
+// Routes
+app.get("/", (req, res) => {
+  res.json({ message: "Restaurant Service Running" });
+});
+
 app.use("/api/restaurant", restaurantRoutes);
 app.use("/api/item", menuItemRoutes);
 app.use("/api/cart", cartRoutes);
@@ -29,7 +34,16 @@ app.use("/api/order", orderRoutes);
 
 const port = process.env.PORT || 5001;
 
-app.listen(port, () => {
-  console.log(`Restaurant service is running on port ${port}`);
-  connectDB();
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(port, () => {
+      console.log(`Restaurant Service Running on ${port}`);
+    });
+  } catch (err) {
+    process.exit(1);
+  }
+};
+
+startServer();

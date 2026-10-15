@@ -13,6 +13,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get("/", (req, res) => {
+  res.json({ message: "Auth Service Running" });
+});
+
 app.use("/api/auth", authRoute);
 
 const port = process.env.PORT || 5000;

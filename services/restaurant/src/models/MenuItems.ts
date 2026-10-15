@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IMenuItem extends Document {
   restaurantId: mongoose.Types.ObjectId;
   name: string;
-  description: string;
+  description?: string;
   image: string;
   price: number;
   isAvailable: boolean;
@@ -31,6 +31,7 @@ const schema = new Schema<IMenuItem>(
     price: {
       type: Number,
       required: true,
+      min: [1, "Price must be greater than 0"],
     },
     image: {
       type: String,
