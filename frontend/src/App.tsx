@@ -16,7 +16,8 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Orders from "./pages/Orders";
 import OrderDetails from "./pages/OrderDetails";
 import RiderDashboard from "./pages/RiderDashboard";
-import LoadingUI from "./utils/loading";
+import LoadingUI from "./utils/Loading";
+import Admin from "./pages/Admin";
 
 const App = () => {
   const { user, loading } = useAppData();
@@ -29,6 +30,10 @@ const App = () => {
 
   if (user && user.role === "rider") {
     return <RiderDashboard />;
+  }
+
+  if (user && user.role === "admin") {
+    return <Admin />;
   }
 
   return (
